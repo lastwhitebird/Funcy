@@ -87,40 +87,6 @@ class Utils
 	}
 
 	/**
-	 * Partial function application
-	 *
-	 * Example (pseudocode)
-	 * --------------------
-	 * fa(greet, name): return greet + ' ' + name
-	 * fx = curry(fa, 'Hello')
-	 *
-	 * fx('Kim') // Hello Kim
-	 * fx('Elin') // Hello Elin
-	 *
-	 * @param
-	 *        	callback
-	 * @param
-	 *        	a1, a2…
-	 * @return closure ∫(callback(a1, a2, …))
-	 */
-	public static function partial($fn)
-	{
-		$args = func_get_args();
-		array_shift($args);
-		
-		if (!is_callable($fn))
-		{
-			trigger_error('First argument must be a valid callback', E_USER_ERROR);
-		}
-		
-		return function () use ($fn, $args)
-		{
-			$xargs = func_get_args();
-			return call_user_func_array($fn, array_merge($args, $xargs));
-		};
-	}
-
-	/**
 	 * Execute the callback on each element in the sequence
 	 *
 	 * Example (pseudocode)
@@ -244,6 +210,91 @@ class Utils
 			return call_user_func_array($fn, $args);
 		};
 	}
-	
+
+	/**
+	 * Partial function application
+	 *
+	 * Example (pseudocode)
+	 * --------------------
+	 * fa(greet, name): return greet + ' ' + name
+	 * fx = curry(fa, 'Hello')
+	 *
+	 * fx('Kim') // Hello Kim
+	 * fx('Elin') // Hello Elin
+	 *
+	 * @param
+	 *        	callback
+	 * @param
+	 *        	a1, a2…
+	 * @return closure ∫(callback(a1, a2, …))
+	 */
+	public static function partial(callable $fn, ...$bound)
+	{
+		return function (...$args) use ($fn, $bound)
+		{
+			return $fn(...self::mergeLeft($bound, $args));
+		};
+	}
+
+	public static function partial_right(callable $fn, ...$bound)
+	{
+		return function (...$args) use ($fn, $bound)
+		{
+			return $fn(...self::mergeRight($bound, $args));
+		};
+	}
+
+	/**
+	 *
+	 * @return Placeholder
+	 */
+	public static function …()
+	{
+		return Placeholder::getInstance();
+	}
+
+	/**
+	 *
+	 * @return Placeholder
+	 */
+	public static function placeholder()
+	{
+		return …();
+	}
+
+	/**
+	 *
+	 * @internal
+	 */
+	public static function mergeLeft(array $stored, array $invoked)
+	{
+		self::resolvePlaceholder($stored, $invoked);
+		return array_merge($stored, $invoked);
+	}
+
+	/**
+	 *
+	 * @internal
+	 */
+	public static function mergeRight(array $stored, array $invoked)
+	{
+		self::resolvePlaceholder($stored, $invoked);
+		return array_merge($invoked, $stored);
+	}
+
+	/**
+	 *
+	 * @internal
+	 */
+	public static function resolvePlaceholder(array &$stored, array &$invoked)
+	{
+		foreach ($stored as $position => &$param)
+		{
+			if ($param instanceof Placeholder)
+			{
+				$param = $param->resolve($invoked, $position);
+			}
+		}
+	}
 	/* End of file funcy.php */
 }

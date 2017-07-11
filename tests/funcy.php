@@ -31,12 +31,20 @@
     return is_identical($fn('d'), 'dabc');
   }
   
-  function test_curry()
+  function test_partial()
   {
-    $a = function($a, $b) { return $a + $b; };
-    $add5 = FN::partial($a, 5);
-    
-    return is_identical($add5(10), 15);
+  	$a = function($a, $b) { return $a ** $b; };
+  	$pow2 = FN::partial($a, 2);
+  	
+  	return is_identical($pow2(10), 1024);
+  }
+  
+  function test_partial_right()
+  {
+  	$a = function($a, $b) { return $a ** $b; };
+  	$cube = FN::partial_right($a, 3);
+  	
+  	return is_identical($cube(10), 1000);
   }
   
   function test_map()
