@@ -1,7 +1,9 @@
 <?php
-  require '../lib/funcy.php';
+  require '../src/Utils.php';
   require './asserts.php';
   
+  use LWB\Functional\Utils as FN;
+
   // Helper functions
   function println($str)
   {
@@ -14,7 +16,7 @@
     $a = function($x) { return $x . 'a'; };
     $b = function($x) { return $x . 'b'; };
     $c = function($x) { return $x . 'c'; };
-    $fn = compose($a, $b, $c);
+    $fn = FN::compose($a, $b, $c);
     
     return is_identical($fn('d'), 'dcba');
   }
@@ -24,7 +26,7 @@
     $a = function($x) { return $x . 'a'; };
     $b = function($x) { return $x . 'b'; };
     $c = function($x) { return $x . 'c'; };
-    $fn = sequence($a, $b, $c);
+    $fn = FN::sequence($a, $b, $c);
     
     return is_identical($fn('d'), 'dabc');
   }
@@ -32,7 +34,7 @@
   function test_curry()
   {
     $a = function($a, $b) { return $a + $b; };
-    $add5 = curry($a, 5);
+    $add5 = FN::partial($a, 5);
     
     return is_identical($add5(10), 15);
   }
@@ -42,15 +44,23 @@
     $a = function($x) { return $x * $x; };
     $range = range(0, 10);
     
-    return is_identical(map($a, $range), array_map($a, $range));
+    return is_identical(FN::map($a, $range), array_map($a, $range));
   }
   
   function test_reduce()
   {
-    $a = function($acc, $x) { return $acc + $x; };
-    $range = range(0, 5);
+    $a = function($acc, $x) { return $x ** $acc; };
+    $range = range(1, 4);
     
-    return is_identical(reduce($a, 1, $range), 16); // 1+0+1+2+3+4+5
+    return is_identical(FN::foldl($a, 0, $range), 262144); // 4 ** 3 ** 2 ** 1 Exponential factorial
+  }
+
+  function test_reduce_right()
+  {
+  	$a = function($acc, $x) { return $x ** $acc; };
+  	$range = range(3, 4);
+  	
+  	return is_identical(FN::foldr($a, 1, $range), 81); // 3 ** 4 ** 1 (pow is right-associative)
   }
   
   function test_flip()
@@ -58,8 +68,8 @@
     $a = function($a, $b) { return pow($a, $b); };
     $b = function($a, $b, $c) { return $a . $b . $c; };
     
-    $af = flip($a);
-    $bf = flip($b);
+    $af = FN::flip($a);
+    $bf = FN::flip($b);
     
     return is_identical($af(10, 2), $a(2, 10))
         && is_identical($bf('a', 'b', 'c'), $b('b', 'a', 'c'));
