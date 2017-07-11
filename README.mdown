@@ -1,4 +1,4 @@
-#This project is made of Burgestrand/Funcy and reactphp/partial
+# This project is made of Burgestrand/Funcy and reactphp/partial
 
 ## Install
 
