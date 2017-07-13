@@ -64,10 +64,10 @@ class Utils
 		return function () use ($fns)
 		{
 			$args = func_get_args();
-			return self::foldl(function ($acc, callable $fn)
+			return self::foldl(function ($acc, callable $fn) use ($args)
 			{
-				return (is_array($acc)) ? $fn(...$acc) : $fn($acc);
-			}, $args, $fns);
+				return ($acc instanceof Placeholder) ? $fn(...$args) : $fn($acc);
+			}, self::…(), $fns);
 		};
 	}
 

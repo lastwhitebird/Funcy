@@ -1,5 +1,6 @@
 <?php
   require '../src/Utils.php';
+  require '../src/Placeholder.php';
   require './asserts.php';
   
   use LWB\Functional\Utils as FN;
