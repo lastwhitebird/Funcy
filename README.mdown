@@ -1,4 +1,4 @@
-# This project is made of Burgestrand/Funcy and reactphp/partial
+# This project is made of Burgestrand/Funcy, reactphp/partial and [currry fn](https://habrahabr.ru/post/144160/).
 
 ## Install
 

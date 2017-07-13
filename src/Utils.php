@@ -227,6 +227,9 @@ class Utils
 	 * @param
 	 *        	a1, a2…
 	 * @return closure ∫(callback(a1, a2, …))
+	 * 
+	 * Replaced by reactphp/partial::bind (renamed to partial, partial_right)
+	 * 
 	 */
 	public static function partial(callable $fn, ...$bound)
 	{
@@ -296,5 +299,32 @@ class Utils
 			}
 		}
 	}
+
 	/* End of file funcy.php */
+	/*
+	 * curry by Andrew Lelechenko
+	 */
+	public static function curry($callback, $args = [])
+	{
+		$num = (new \ReflectionFunction($callback))->getNumberOfRequiredParameters();
+		return function (...$invoked) use ($callback, $args, $num)
+		{
+			$args = array_merge($args, $invoked);
+			if (count($args) >= $num)
+				return $callback(...$args);
+			else
+				return self::curry($callback, $args, $num);
+		};
+	}
+
+	/*
+	 * uncurry by LWB 
+	 */
+	public static function uncurry($callback)
+	{
+		return function (...$invoked) use ($callback)
+		{
+			return self::foldl('call_user_func', $callback, $invoked);
+		};
+	}
 }
