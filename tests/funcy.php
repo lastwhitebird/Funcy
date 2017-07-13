@@ -82,6 +82,24 @@
     return is_identical($af(10, 2), $a(2, 10))
         && is_identical($bf('a', 'b', 'c'), $b('b', 'a', 'c'));
   }
+
+  function test_curry()
+  {
+  	$str_replace=FN::curry('str_replace');
+  	$f1=$str_replace('a');
+  	$f2=$f1('Z');
+  	$f3=$f2('asdfasdfasdf');
+ 	
+  	return is_identical($f3, 'ZsdfZsdfZsdf'); 
+  }
+  
+  function test_uncurry()
+  {
+  	$str_replace=FN::curry('str_replace');
+  	$str_uncurry=FN::uncurry($str_replace);
+  	
+  	return is_identical($str_uncurry('-','.','1970-01-01'), '1970.01.01');
+  }
   
   // Extract tests and run!
   $functions = get_defined_functions();

@@ -37,11 +37,8 @@ class Utils
 	 */
 	public static function compose()
 	{
-		$fns = func_get_args();
-		return call_user_func_array([
-				__CLASS__,
-				'sequence' 
-		], array_reverse($fns));
+		$fns = array_reverse(func_get_args());
+		return self::sequence(...$fns);
 	}
 
 	/**
@@ -64,25 +61,13 @@ class Utils
 	{
 		$fns = func_get_args();
 		
-		foreach ($fns as $i => $fn)
-		{
-			if (!is_callable($fn, FALSE, $name))
-			{
-				trigger_error("All arguments must be valid callbacks (arg#{$i}: “${name}” failed)", E_USER_ERROR);
-			}
-		}
-		
 		return function () use ($fns)
 		{
 			$args = func_get_args();
-			$acc = call_user_func_array(array_shift($fns), $args);
-			
-			foreach ($fns as $fn)
+			return self::foldl(function ($acc, callable $fn)
 			{
-				$acc = $fn($acc);
-			}
-			
-			return $acc;
+				return (is_array($acc)) ? $fn(...$acc) : $fn($acc);
+			}, $args, $fns);
 		};
 	}
 
@@ -140,20 +125,10 @@ class Utils
 	 *        	Iterator
 	 * @return array
 	 */
-	public static function foldl($fn, $init, $iterable)
+	public static function foldl(callable $fn, $acc, $iterable)
 	{
-		if (!is_callable($fn))
-		{
-			trigger_error('First argument must be a valid callback', E_USER_ERROR);
-		}
-		
-		$acc = $init;
-		
 		foreach ($iterable as $x)
-		{
 			$acc = $fn($acc, $x);
-		}
-		
 		return $acc;
 	}
 
@@ -165,20 +140,10 @@ class Utils
 		}
 	}
 
-	public static function foldr($fn, $init, $iterable)
+	public static function foldr(callable $fn, $acc, $iterable)
 	{
-		if (!is_callable($fn))
-		{
-			trigger_error('First argument must be a valid callback', E_USER_ERROR);
-		}
-		
-		$acc = $init;
-		
 		foreach (self::iter_reverse($iterable) as $x)
-		{
 			$acc = $fn($acc, $x);
-		}
-		
 		return $acc;
 	}
 
@@ -227,9 +192,9 @@ class Utils
 	 * @param
 	 *        	a1, a2…
 	 * @return closure ∫(callback(a1, a2, …))
-	 * 
-	 * Replaced by reactphp/partial::bind (renamed to partial, partial_right)
-	 * 
+	 *        
+	 *         Replaced by reactphp/partial::bind (renamed to partial, partial_right)
+	 *        
 	 */
 	public static function partial(callable $fn, ...$bound)
 	{
@@ -269,7 +234,7 @@ class Utils
 	 *
 	 * @internal
 	 */
-	public static function mergeLeft(array $stored, array $invoked)
+	private static function mergeLeft(array $stored, array $invoked)
 	{
 		self::resolvePlaceholder($stored, $invoked);
 		return array_merge($stored, $invoked);
@@ -279,7 +244,7 @@ class Utils
 	 *
 	 * @internal
 	 */
-	public static function mergeRight(array $stored, array $invoked)
+	private static function mergeRight(array $stored, array $invoked)
 	{
 		self::resolvePlaceholder($stored, $invoked);
 		return array_merge($invoked, $stored);
@@ -292,17 +257,13 @@ class Utils
 	public static function resolvePlaceholder(array &$stored, array &$invoked)
 	{
 		foreach ($stored as $position => &$param)
-		{
 			if ($param instanceof Placeholder)
-			{
 				$param = $param->resolve($invoked, $position);
-			}
-		}
 	}
 
 	/* End of file funcy.php */
 	/*
-	 * curry by Andrew Lelechenko
+	 * curry (c) by Andrew Lelechenko, 2012
 	 */
 	public static function curry($callback, $args = [])
 	{
@@ -318,7 +279,7 @@ class Utils
 	}
 
 	/*
-	 * uncurry by LWB 
+	 * uncurry by LWB
 	 */
 	public static function uncurry($callback)
 	{
