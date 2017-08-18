@@ -265,9 +265,10 @@ class Utils
 	/*
 	 * curry (c) by Andrew Lelechenko, 2012
 	 */
-	public static function curry($callback, $args = [])
+	public static function curry($callback, $args = [], $num = false)
 	{
-		$num = (new \ReflectionFunction($callback))->getNumberOfRequiredParameters();
+		if ($num === false)
+			$num = (new \ReflectionFunction($callback))->getNumberOfRequiredParameters();
 		return function (...$invoked) use ($callback, $args, $num)
 		{
 			$args = array_merge($args, $invoked);
