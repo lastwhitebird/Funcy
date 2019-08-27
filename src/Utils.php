@@ -227,7 +227,7 @@ class Utils
 	 */
 	public static function placeholder()
 	{
-		return …();
+		return self::…();
 	}
 
 	/**
